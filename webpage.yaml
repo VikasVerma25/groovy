@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webpage
+  labels:
+    app: webpage
+spec:
+  ports:
+    - nodePort: 30303
+      port: 80      
+      
+  selector:
+    app: webpage   
+  type: NodePort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-pv-claim
+  labels:
+    app: webpage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: webpage
+  labels:
+    app: webpage
+spec:
+  selector:
+    matchLabels:
+      app: webpage      
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: webpage        
+    spec:
+      containers:
+      - image: httpd
+        name: httpd        
+        ports:
+        - containerPort: 80
+          name: mypage
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /usr/local/apache2/htdocs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: web-pv-claim
