@@ -1,15 +1,22 @@
 job('Job1') {
     description('launching pod on K8s and deploying code to webserver')
     steps {
-        shell(""" if kubectl get pods | grep webpage
-then
-echo "alraedy running"
-else
-kubectl create -f /workspace/webpage.yaml
-sleep 10
-fi
-podname=$(kubectl get pod -l app=webpage -o jsonpath="{.items[0].metadata.name}")
-kubectl cp /workspace/*.html $podname:/usr/local/apache2/htdocs/ """)
+        shell(""" 
+        if ls /workspace | grep .html
+        then        
+            echo "using httpd image to deploy"
+            if sudo kubectl get pods | grep webpage
+            then
+            echo "alraedy running"
+            else
+            sudo kubectl create -f /workspace/webpage.yaml
+            sleep 15            
+            podname=$(sudo kubectl get pod -l app=webpage -o jsonpath="{.items[0].metadata.name}")
+            sudo kubectl cp /workspace/*.html $podname:/usr/local/apache2/htdocs/
+            fi
+        else 
+        echo "Not an html file"
+        fi """)
     }
 }
 job('Job2') {
@@ -22,13 +29,14 @@ job('Job2') {
         }
     }
     steps {
-        shell(""" status=$(curl -o /dev/null -s -w "{%http_code}" http://192.168.99.101:30303)
-if [[ $status==200 ]]
-then
-python3 /workspace/success.py
-else
-python3 /workspace/fail.py
-fi """)
+        shell(""" 
+        status=$(curl -o /dev/null -s -w "{%http_code}" http://192.168.99.101:30303)
+        if [[ $status==200 ]]
+        then
+        python3 /workspace/success.py
+        else
+        python3 /workspace/fail.py
+        fi """)
     }
 }
 
