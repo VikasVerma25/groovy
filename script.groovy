@@ -4,14 +4,14 @@ job('Job1') {
         shell(''' if ls /workspace | grep .html
         then        
             echo "using httpd image to deploy"
-            if kubectl get pods | grep webpage
+            if sudo kubectl get pods | grep webpage
             then
             echo "alraedy running"
             else
-            kubectl create -f /workspace/webpage.yaml
+            sudo kubectl create -f /workspace/webpage.yaml
             sleep 25            
-            podname=$(kubectl get pod -l app=webpage -o jsonpath="{.items[0].metadata.name}")
-            kubectl cp /workspace/*.html $podname:/usr/local/apache2/htdocs/
+            podname=$(sudo kubectl get pod -l app=webpage -o jsonpath="{.items[0].metadata.name}")
+            sudo kubectl cp /workspace/*.html $podname:/usr/local/apache2/htdocs/
             fi
         else 
         echo "Not an html file"
@@ -30,9 +30,9 @@ job('Job2') {
         shell(''' status=$(curl -o /dev/null -s -w "%{http_code}" http://192.168.99.101:30303)
 if [[ $status==200 ]]
 then
-    python3 /workspace/success.py
+    sudo python3 /workspace/success.py
 else
-    python3 /workspace/fail.py
+    sudo python3 /workspace/fail.py
 fi ''')
     }
 }
