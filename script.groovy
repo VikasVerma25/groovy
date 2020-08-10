@@ -27,7 +27,7 @@ job('Job2') {
         }
     }
     steps {
-        shell(''' status=$(curl -o /dev/null -s -w "%{http_code}" http://192.168.99.101:30303)
+        shell(''' status=$(curl -o /dev/null -s -w "%{http_code}" http://10.148.0.14:30303/code.html)
 if [[ $status==200 ]]
 then
     sudo python3 /workspace/success.py
@@ -37,13 +37,13 @@ fi ''')
     }
 }
 
-buildPipelineView('Task 6') {
+buildPipelineView('task 6') {
     filterBuildQueue()
     filterExecutors()
     title('deploy webpage over k8s cluster')
-    displayedBuilds(5)
+    displayedBuilds(1)
     selectedJob('Job1')
     alwaysAllowManualTrigger()
     showPipelineParameters()
-    refreshFrequency(60)
+    refreshFrequency(3)
 }
